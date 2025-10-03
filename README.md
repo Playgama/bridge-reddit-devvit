@@ -2,7 +2,7 @@
 
 This repository provides the integration layer for creating **Reddit Games** for Reddit Platform that work with the [Playgama Bridge](https://github.com/Playgama/bridge).
 
-It enables Playgama Bridge integrated HTML5 games to run as Huawei Quick Apps, offering access to:
+It enables Playgama Bridge integrated HTML5 games to run as Reddit Apps, offering access to:
  
 - **In-App Purchases (IAP)** — support for Reddit in-app purchase system.  
 - **Cloud Saves** — persistent storage of player progress using Huawei cloud services. 
