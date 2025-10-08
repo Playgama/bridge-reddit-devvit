@@ -1,12 +1,12 @@
 {
   "private": true,
-  "name": "pgbridge4",
+  "name": "bridge-devvit",
   "version": "0.0.0",
   "license": "BSD-3-Clause",
   "type": "module",
   "scripts": {
-    "build:server": "cd src/server && vite build",
-    "deploy": "npm run build:server && devvit upload",
+    "init": "npm create devvit",
+    "deploy": "devvit upload",
     "dev": "dotenv -e .env -- devvit playtest",
     "dev:bridge": "devvit playtest r/pg_bridge_dev2",
     "login": "devvit login",
@@ -15,12 +15,12 @@
   },
   "dependencies": {
     "@devvit/public-api": "0.12.0",
-    "@devvit/web": "^0.12.0",
+    "@devvit/web": "0.12.0",
     "express": "^5.1.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
-    "devvit": "^0.12.0",
+    "devvit": "0.12.0",
     "dotenv-cli": "8.0.0",
     "typescript": "5.8.3",
     "vite": "^7.1.9"
