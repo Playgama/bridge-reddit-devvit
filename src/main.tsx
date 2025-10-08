@@ -42,85 +42,77 @@ Devvit.addCustomPostType({
     const { mount } = useWebView({
       url: "game/index.html",
       onMessage: async (message: any, webView) => {
-        console.log("MESSAGGE =======>", { message })
-        if (message.type === ACTION_NAME.INITIALIZE) {
+        // helpers
+        const postToWebView = (type: string, data: any) => {
+          webView.postMessage({ type, data });
+        }
+
+        // message handlers
+        // initialize
+        const handleInitialize = () => {
           webView.postMessage({
             type: ACTION_NAME.INITIALIZE,
             data: { isInitialized: true },
           });
-        } else if (message.type === ACTION_NAME.SET_STORAGE_DATA) {
+        }
+
+        // storage
+        const handleSetStorageData = async (message: any) => {
           try {
             const { key, value } = message.data;
             if (Array.isArray(key)) {
-              if (!Array.isArray(value)) {
-                throw new Error("Value must be an array if key is an array");
-              }
-              if (key.length !== value.length) {
-                throw new Error("Key and value arrays must have the same length");
-              }
-
-              await Promise.all(
-                key.map((k, i) => _context.redis.set(String(k), String(value[i])))
-              );
+              await Promise.all(key.map((k, i) => _context.redis.set(String(k), String(value[i]))));
             } else {
               await _context.redis.set(String(key), String(value as unknown as string));
             }
 
-            webView.postMessage({
-              type: ACTION_NAME.SET_STORAGE_DATA,
-              data: { success: true },
-            });
+            postToWebView(ACTION_NAME.SET_STORAGE_DATA, { success: true })
           } catch (error) {
-            webView.postMessage({
-              type: ACTION_NAME.SET_STORAGE_DATA,
-              data: { success: false, error: String(error) },
-            });
+            postToWebView(ACTION_NAME.SET_STORAGE_DATA, { success: false, error: String(error) })
           }
-        } else if (message.type === ACTION_NAME.GET_STORAGE_DATA) {
+        }
+
+        const handleGetStorageData = async (message: any) => {
           const { key } = message.data;
           let result;
 
           try {
             if (Array.isArray(key)) {
-              const values = await Promise.all(key.map((k) => {
-                console.log("Key", String(k))
-                return _context.redis.get(String(k))
-              }));
+              const values = await Promise.all(key.map((k) => _context.redis.get(String(k))));
               result = values.map((v) => (v ?? null));
             } else {
               result = await _context.redis.get(String(key)) || null
             }
 
-            webView.postMessage({
-              type: ACTION_NAME.GET_STORAGE_DATA,
-              data: { success: true, data: result },
-            });
+            postToWebView(ACTION_NAME.GET_STORAGE_DATA, { success: true, data: result })
           } catch (error) {
-            webView.postMessage({
-              type: ACTION_NAME.GET_STORAGE_DATA,
-              data: { success: false, error: String(error) },
-            });
+            postToWebView(ACTION_NAME.GET_STORAGE_DATA, { success: false, error: String(error) })
           }
-        } else if (message.type === ACTION_NAME.DELETE_STORAGE_DATA) {
+        }
+
+        const handleDeleteStorageData = async (message: any) => {
           try {
             const { key } = message.data;
             if (Array.isArray(key)) {
               await Promise.all(key.map((k) => _context.redis.del(String(k))));
-              return;
+            } else {
+              await _context.redis.del(String(key));
             }
 
-            await _context.redis.del(String(key));
-
-            webView.postMessage({
-              type: ACTION_NAME.DELETE_STORAGE_DATA,
-              data: { success: true },
-            });
+            postToWebView(ACTION_NAME.DELETE_STORAGE_DATA, { success: true })
           } catch (error) {
-            webView.postMessage({
-              type: ACTION_NAME.DELETE_STORAGE_DATA,
-              data: { success: false, error: String(error) },
-            });
+            postToWebView(ACTION_NAME.DELETE_STORAGE_DATA, { success: false, error: String(error) })
           }
+        }
+
+        if (message.type === ACTION_NAME.INITIALIZE) {
+          handleInitialize()
+        } else if (message.type === ACTION_NAME.SET_STORAGE_DATA) {
+          handleSetStorageData(message)
+        } else if (message.type === ACTION_NAME.GET_STORAGE_DATA) {
+          handleGetStorageData(message)
+        } else if (message.type === ACTION_NAME.DELETE_STORAGE_DATA) {
+          handleDeleteStorageData(message)
         }
       }
     })
