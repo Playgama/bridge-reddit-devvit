@@ -3,31 +3,13 @@ import { addPaymentHandler, OnPurchaseResult, usePayments, getProducts, getOrder
 
 export const ACTION_NAME = {
   INITIALIZE: 'initialize',
-  AUTHORIZE_PLAYER: 'authorize_player',
-  SHARE: 'share',
-  INVITE_FRIENDS: 'invite_friends',
-  JOIN_COMMUNITY: 'join_community',
   CREATE_POST: 'create_post',
-  ADD_TO_HOME_SCREEN: 'add_to_home_screen',
-  ADD_TO_FAVORITES: 'add_to_favorites',
-  RATE: 'rate',
-  LEADERBOARDS_SET_SCORE: 'leaderboards_set_score',
-  LEADERBOARDS_GET_ENTRIES: 'leaderboards_get_entries',
-  LEADERBOARDS_SHOW_NATIVE_POPUP: 'leaderboards_show_native_popup',
   GET_PURCHASES: 'get_purchases',
   GET_CATALOG: 'get_catalog',
   PURCHASE: 'purchase',
-  CONSUME_PURCHASE: 'consume_purchase',
-  GET_REMOTE_CONFIG: 'get_remote_config',
   GET_STORAGE_DATA: 'get_storage_data',
   SET_STORAGE_DATA: 'set_storage_data',
   DELETE_STORAGE_DATA: 'delete_storage_data',
-  CLIPBOARD_WRITE: 'clipboard_write',
-  ADBLOCK_DETECT: 'adblock_detect',
-  SET_INTERSTITIAL_STATE: 'set_interstitial_state',
-  SET_REWARDED_STATE: 'set_rewarded_state',
-  SHOW_INTERSTITIAL: 'show_interstitial',
-  SHOW_REWARDED: 'show_rewarded',
 }
 
 Devvit.configure({
@@ -150,6 +132,18 @@ Devvit.addCustomPostType({
           }
         }
 
+        // social
+        const handleCreatePost = async (message: any) => {
+          try {
+            const { options } = message.data;
+            const post = await context.reddit.submitPost(options);
+
+            postToWebView(ACTION_NAME.CREATE_POST, { success: true, data: { postId: post.id, postUrl: post.url } })
+          } catch (error) {
+            postToWebView(ACTION_NAME.CREATE_POST, { success: false, error: String(error) })
+          }
+        }
+
         if (message.type === ACTION_NAME.INITIALIZE) {
           await handleInitialize()
         } else if (message.type === ACTION_NAME.SET_STORAGE_DATA) {
@@ -164,6 +158,8 @@ Devvit.addCustomPostType({
           await handleGetCatalog()
         } else if (message.type === ACTION_NAME.GET_PURCHASES) {
           await handleGetPurchases()
+        } else if (message.type === ACTION_NAME.CREATE_POST) {
+          await handleCreatePost(message)
         }
       }
     })
