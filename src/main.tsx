@@ -1,5 +1,6 @@
 // Learn more at developers.reddit.com/docs
 import { Devvit, useWebView } from "@devvit/public-api";
+import { addPaymentHandler, OnPurchaseResult, usePayments, getProducts, getOrders } from '@devvit/payments';
 
 export const ACTION_NAME = {
   INITIALIZE: 'initialize',
@@ -31,29 +32,37 @@ export const ACTION_NAME = {
 }
 
 Devvit.configure({
-  redis: true
+  redis: true,
+  redditAPI: true,
 })
+
+addPaymentHandler({
+  fulfillOrder: async (order, ctx) => {},
+});
 
 // Add a post type definition
 Devvit.addCustomPostType({
-  name: "Experience Post",
+  name: "Game",
   height: "regular",
   render: (_context) => {
-    const { mount } = useWebView({
-      url: "game/index.html",
-      onMessage: async (message: any, webView) => {
-        // helpers
-        const postToWebView = (type: string, data: any) => {
-          webView.postMessage({ type, data });
-        }
+    function postToWebView(type: string, data: any) {
+      postMessage({ type, data });
+    }
 
-        // message handlers
+    const payments = usePayments(({ sku, orderId, status, errorCode, errorMessage }: OnPurchaseResult) => {
+      if (status === 1) {
+        postToWebView(ACTION_NAME.PURCHASE, { success: true, sku, orderId });
+      } else {
+        postToWebView(ACTION_NAME.PURCHASE, { success: false, sku, errorCode, errorMessage });
+      }
+    });
+
+    const { mount, postMessage } = useWebView({
+      url: "game/index.html",
+      onMessage: async (message: any) => {
         // initialize
         const handleInitialize = () => {
-          webView.postMessage({
-            type: ACTION_NAME.INITIALIZE,
-            data: { isInitialized: true },
-          });
+          postToWebView(ACTION_NAME.INITIALIZE, { success: true, isIsnitialized: true })
         }
 
         // storage
@@ -105,14 +114,46 @@ Devvit.addCustomPostType({
           }
         }
 
+        // payments
+        const handlePurchase = async (message: any) => {
+          const { id } = message.data;
+          payments.purchase(id)
+        }
+
+        const handleGetCatalog = async () => {
+          try {
+            const products = await getProducts();
+
+            postToWebView(ACTION_NAME.GET_CATALOG, { success: true, data: products })
+          } catch (error) {
+            postToWebView(ACTION_NAME.GET_CATALOG, { success: false, error: String(error) })
+          }
+        }
+
+        const handleGetPurchases = async () => {
+          try {
+            const purchases = await getOrders();
+
+            postToWebView(ACTION_NAME.GET_PURCHASES, { success: true, data: purchases })
+          } catch (error) {
+            postToWebView(ACTION_NAME.GET_PURCHASES, { success: false, error: String(error) })
+          }
+        }
+
         if (message.type === ACTION_NAME.INITIALIZE) {
           handleInitialize()
         } else if (message.type === ACTION_NAME.SET_STORAGE_DATA) {
-          handleSetStorageData(message)
+          await handleSetStorageData(message)
         } else if (message.type === ACTION_NAME.GET_STORAGE_DATA) {
-          handleGetStorageData(message)
+          await handleGetStorageData(message)
         } else if (message.type === ACTION_NAME.DELETE_STORAGE_DATA) {
-          handleDeleteStorageData(message)
+          await handleDeleteStorageData(message)
+        } else if (message.type === ACTION_NAME.PURCHASE) {
+          await handlePurchase(message)
+        } else if (message.type === ACTION_NAME.GET_CATALOG) {
+          await handleGetCatalog()
+        } else if (message.type === ACTION_NAME.GET_PURCHASES) {
+          await handleGetPurchases()
         }
       }
     })
@@ -131,7 +172,7 @@ Devvit.addCustomPostType({
           appearance="primary"
           onPress={() => mount()}
         >
-          Mount
+          Play
         </button>
       </vstack>
     );

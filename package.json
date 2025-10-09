@@ -14,6 +14,7 @@
     "type-check": "tsc --build"
   },
   "dependencies": {
+    "@devvit/payments": "^0.12.0",
     "@devvit/public-api": "0.12.0",
     "@devvit/web": "0.12.0",
     "express": "^5.1.0"
