@@ -1,4 +1,3 @@
-// Learn more at developers.reddit.com/docs
 import { Devvit, useWebView } from "@devvit/public-api";
 import { addPaymentHandler, OnPurchaseResult, usePayments, getProducts, getOrders } from '@devvit/payments';
 
@@ -40,11 +39,10 @@ addPaymentHandler({
   fulfillOrder: async (order, ctx) => {},
 });
 
-// Add a post type definition
 Devvit.addCustomPostType({
   name: "Game",
   height: "regular",
-  render: (_context) => {
+  render: (context) => {
     function postToWebView(type: string, data: any) {
       postMessage({ type, data });
     }
@@ -61,8 +59,20 @@ Devvit.addCustomPostType({
       url: "game/index.html",
       onMessage: async (message: any) => {
         // initialize
-        const handleInitialize = () => {
-          postToWebView(ACTION_NAME.INITIALIZE, { success: true, isIsnitialized: true })
+        const handleInitialize = async () => {
+          const currentUser = await context.reddit.getCurrentUser();
+
+          const data: any = {
+            isPlayerAuthorized: !!currentUser,
+          }
+
+          if (currentUser) {
+            data.playerId = currentUser.id;
+            data.playerName = currentUser.username;
+            data.playerPhoto = await currentUser.getSnoovatarUrl();
+          }
+          
+          postToWebView(ACTION_NAME.INITIALIZE, { success: true, ...data  })
         }
 
         // storage
@@ -70,9 +80,9 @@ Devvit.addCustomPostType({
           try {
             const { key, value } = message.data;
             if (Array.isArray(key)) {
-              await Promise.all(key.map((k, i) => _context.redis.set(String(k), String(value[i]))));
+              await Promise.all(key.map((k, i) => context.redis.set(String(k), String(value[i]))));
             } else {
-              await _context.redis.set(String(key), String(value as unknown as string));
+              await context.redis.set(String(key), String(value as unknown as string));
             }
 
             postToWebView(ACTION_NAME.SET_STORAGE_DATA, { success: true })
@@ -87,10 +97,10 @@ Devvit.addCustomPostType({
 
           try {
             if (Array.isArray(key)) {
-              const values = await Promise.all(key.map((k) => _context.redis.get(String(k))));
+              const values = await Promise.all(key.map((k) => context.redis.get(String(k))));
               result = values.map((v) => (v ?? null));
             } else {
-              result = await _context.redis.get(String(key)) || null
+              result = await context.redis.get(String(key)) || null
             }
 
             postToWebView(ACTION_NAME.GET_STORAGE_DATA, { success: true, data: result })
@@ -103,9 +113,9 @@ Devvit.addCustomPostType({
           try {
             const { key } = message.data;
             if (Array.isArray(key)) {
-              await Promise.all(key.map((k) => _context.redis.del(String(k))));
+              await Promise.all(key.map((k) => context.redis.del(String(k))));
             } else {
-              await _context.redis.del(String(key));
+              await context.redis.del(String(key));
             }
 
             postToWebView(ACTION_NAME.DELETE_STORAGE_DATA, { success: true })
@@ -141,7 +151,7 @@ Devvit.addCustomPostType({
         }
 
         if (message.type === ACTION_NAME.INITIALIZE) {
-          handleInitialize()
+          await handleInitialize()
         } else if (message.type === ACTION_NAME.SET_STORAGE_DATA) {
           await handleSetStorageData(message)
         } else if (message.type === ACTION_NAME.GET_STORAGE_DATA) {
