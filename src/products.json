@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developers.reddit.com/schema/products.json",
+  "products": [
+    {
+      "sku": "noads",
+      "displayName": "noads",
+      "description": "noads",
+      "price": 5,
+      "accountingType": "CONSUMABLE"
+    }
+  ]
+}

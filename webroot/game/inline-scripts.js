@@ -1,11 +1,12 @@
 function addDynamicScript() {
     const scriptElement = document.createElement('script')
-    const timestamp = Date.now()
+    // const timestamp = Date.now()
 
-    scriptElement.src = `./playgama-bridge.js?r=${timestamp}`
+    // scriptElement.src = `./playgama-bridge.js?r=${timestamp}`
+    scriptElement.src = './playgama-bridge.js'
     document.body.appendChild(scriptElement)
 
-    scriptElement.onload = function() {
+    scriptElement.onload = function () {
         runAfterScriptLoad()
     }
 }
@@ -150,10 +151,10 @@ function runAfterScriptLoad() {
     const clipboardReadButton = document.getElementById('clipboard-read-button')
     const clipboardWriteButton = document.getElementById('clipboard-write-button')
 
-    var gameVisibilityStates = []
-    var lastInterstitialStates = []
-    var lastRewardedStates = []
-    var lastBannerStates = []
+    const gameVisibilityStates = []
+    let lastInterstitialStates = []
+    let lastRewardedStates = []
+    let lastBannerStates = []
 
     bridge
         .initialize()
@@ -202,12 +203,12 @@ function runAfterScriptLoad() {
             gameVisibilityStates.push(bridge.game.visibilityState)
             gameVisibilityStatesText.innerText = gameVisibilityStates.join(' → ')
 
-            bridge.game.on('visibility_state_changed', state => {
+            bridge.game.on('visibility_state_changed', (state) => {
                 gameVisibilityStates.push(state)
                 gameVisibilityStatesText.innerText = gameVisibilityStates.join(' → ')
             })
 
-            bridge.advertisement.on('interstitial_state_changed', state => {
+            bridge.advertisement.on('interstitial_state_changed', (state) => {
                 lastInterstitialStates.push(state)
 
                 if (lastInterstitialStates.length > 3) {
@@ -217,7 +218,7 @@ function runAfterScriptLoad() {
                 advertisementInterstitialStateText.innerText = lastInterstitialStates.join(' → ')
             })
 
-            bridge.advertisement.on('rewarded_state_changed', state => {
+            bridge.advertisement.on('rewarded_state_changed', (state) => {
                 lastRewardedStates.push(state)
 
                 if (lastRewardedStates.length > 3) {
@@ -228,7 +229,7 @@ function runAfterScriptLoad() {
                 advertisementRewardedPlacementText.innerText = bridge.advertisement.rewardedPlacement
             })
 
-            bridge.advertisement.on('banner_state_changed', state => {
+            bridge.advertisement.on('banner_state_changed', (state) => {
                 lastBannerStates.push(state)
 
                 if (lastBannerStates.length > 3) {
@@ -266,12 +267,12 @@ function runAfterScriptLoad() {
 
     platformServerTimeButton.addEventListener('click', () => {
         bridge.platform.getServerTime()
-        .then((timestamp) => {
-            platformServerTimeText.innerText = timestamp;
-        })
-        .catch(() => {
-            platformServerTimeText.innerText = 'Failed to fetch'
-        });
+            .then((timestamp) => {
+                platformServerTimeText.innerText = timestamp
+            })
+            .catch(() => {
+                platformServerTimeText.innerText = 'Failed to fetch'
+            })
     })
 
     platformMessageButton.addEventListener('click', () => {
@@ -282,7 +283,7 @@ function runAfterScriptLoad() {
                 platformSendMessageStatus.innerText = 'Success'
             })
             .catch((error) => {
-                platformSendMessageStatus.innerText = 'Failed: ' + error;
+                platformSendMessageStatus.innerText = `Failed: ${error}`
             })
     })
 
@@ -294,7 +295,7 @@ function runAfterScriptLoad() {
                 platformAllGamesContainer.innerText = JSON.stringify(games, undefined, 2)
             })
             .catch((error) => {
-                platformAllGamesContainer.innerText = 'Failed: ' + error;
+                platformAllGamesContainer.innerText = `Failed: ${error}`
             })
     })
 
@@ -306,7 +307,7 @@ function runAfterScriptLoad() {
                 platformGameByIdContainer.innerText = JSON.stringify(game, undefined, 2)
             })
             .catch((error) => {
-                platformGameByIdContainer.innerText = 'Failed: ' + error;
+                platformGameByIdContainer.innerText = `Failed: ${error}`
             })
     })
 
@@ -333,14 +334,14 @@ function runAfterScriptLoad() {
                     storageDataLevelInput.value = data[1]
                 }
             })
-            .catch(error => console.log('Get Storage Data Error', error))
+            .catch((error) => console.log('Get Storage Data Error', error))
     })
 
     setStorageDataButton.addEventListener('click', () => {
         bridge.storage
             .set(['coins', 'level'], [storageDataCoinsInput.value, storageDataLevelInput.value], storageTypeInput.value)
             .then(() => console.log('Set Storage Data: Done'))
-            .catch(error => console.log('Set Storage Data Error', error))
+            .catch((error) => console.log('Set Storage Data Error', error))
     })
 
     deleteStorageDataButton.addEventListener('click', () => {
@@ -351,11 +352,11 @@ function runAfterScriptLoad() {
                 storageDataLevelInput.value = ''
                 console.log('Delete Storage Data: Done')
             })
-            .catch(error => console.log('Delete Storage Data Error', error))
+            .catch((error) => console.log('Delete Storage Data Error', error))
     })
 
     advertisementSetMinimumDelayBetweenInterstitialButton.addEventListener('click', () => {
-        let value = advertisementMinimumDelayBetweenInterstitialInput.value
+        const { value } = advertisementMinimumDelayBetweenInterstitialInput
         bridge.advertisement.setMinimumDelayBetweenInterstitial(value)
         advertisementMinimumDelayBetweenInterstitialInput.value = bridge.advertisement.minimumDelayBetweenInterstitial
     })
@@ -384,10 +385,10 @@ function runAfterScriptLoad() {
     })
 
     socialShareButton.addEventListener('click', () => {
-        let data = {
+        const data = {
             vk: {
-                link: socialVkShareLinkInput.value
-            }
+                link: socialVkShareLinkInput.value,
+            },
         }
 
         bridge.social.share(data)
@@ -402,17 +403,17 @@ function runAfterScriptLoad() {
     })
 
     socialCreatePostButton.addEventListener('click', () => {
-        let data = {
+        const data = {
             vk: {
                 message: socialCreatePostMessageInput.value,
                 attachments: socialCreatePostAttachmentsInput.value,
             },
             ok: {
                 media: [{
-                    "type": "text",
-                    "text": socialCreatePostMessageInput.value
-                }]
-            }
+                    type: 'text',
+                    text: socialCreatePostMessageInput.value,
+                }],
+            },
         }
         bridge.social.createPost(data)
     })
@@ -432,17 +433,17 @@ function runAfterScriptLoad() {
     leaderboardsSetScoreButton.addEventListener('click', () => {
         bridge
             .leaderboards
-            .setScore(leaderboardsIdInput.value,  leaderboardsScoreInput.value)
+            .setScore(leaderboardsIdInput.value, leaderboardsScoreInput.value)
     })
 
     leaderboardsGetEntriesButton.addEventListener('click', () => {
         bridge
             .leaderboards
             .getEntries(leaderboardsIdInput.value)
-            .then(data => {
+            .then((data) => {
                 let text = ''
-                data.forEach(e => {
-                    text += 'ID: ' + e.id + ', name: ' + e.name + ', score: ' + e.score + ', rank: ' + e.rank + ', photo: ' + e.photo
+                data.forEach((e) => {
+                    text += `ID: ${e.id}, name: ${e.name}, score: ${e.score}, rank: ${e.rank}, photo: ${e.photo}`
                 })
                 leaderboardsEntriesContainer.innerText = text
             })
@@ -455,16 +456,12 @@ function runAfterScriptLoad() {
 
     paymentsGetPurchasesButton.addEventListener('click', () => {
         bridge.payments.getPurchases()
-            .then((purchases) =>
-                paymentPurchasesContainer.innerText = JSON.stringify(purchases, undefined, 2)
-            )
+            .then((purchases) => paymentPurchasesContainer.innerText = JSON.stringify(purchases, undefined, 2))
     })
 
     paymentsGetCatalogButton.addEventListener('click', () => {
         bridge.payments.getCatalog()
-            .then((catalog) =>
-                paymentCatalogContainer.innerText = JSON.stringify(catalog, undefined, 2)
-            )
+            .then((catalog) => paymentCatalogContainer.innerText = JSON.stringify(catalog, undefined, 2))
     })
 
     paymentsPurchaseButton.addEventListener('click', () => {
@@ -491,33 +488,32 @@ function runAfterScriptLoad() {
     })
 
     achievementsUnlockButton.addEventListener('click', () => {
-        let options = {};
+        let options = {}
 
         switch (bridge.platform.id) {
             case 'lagged':
                 options = {
                     achievement: achievementsIdInput.value,
                 }
-                break;
+                break
             case 'y8':
                 options = {
                     achievement: achievementsNameInput.value,
                     achievementkey: achievementsIdInput.value,
                 }
-                break;
+                break
             default:
-                break;
+                break
         }
 
         bridge.achievements.unlock(options)
             .then((result) => achievementsUnlockStatusContainer.innerText = JSON.stringify(result))
             .catch((error) => console.log(error))
-
     })
 
     remoteConfigButton.addEventListener('click', () => {
         bridge.remoteConfig.get()
-            .then(config => {
+            .then((config) => {
                 remoteConfigContainer.innerText = JSON.stringify(config, undefined, 2)
             })
             .catch((error) => console.log(error))
@@ -525,7 +521,7 @@ function runAfterScriptLoad() {
 
     clipboardReadButton.addEventListener('click', () => {
         bridge.clipboard.read()
-            .then(text => {
+            .then((text) => {
                 clipboardInput.value = text
             })
             .catch((error) => console.log(error))
