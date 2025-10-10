@@ -4,6 +4,7 @@ import { addPaymentHandler, OnPurchaseResult, usePayments, getProducts, getOrder
 export const ACTION_NAME = {
   INITIALIZE: 'initialize',
   CREATE_POST: 'create_post',
+  JOIN_COMMUNITY: 'join_community',
   GET_PURCHASES: 'get_purchases',
   GET_CATALOG: 'get_catalog',
   PURCHASE: 'purchase',
@@ -144,6 +145,16 @@ Devvit.addCustomPostType({
           }
         }
 
+        const handleJoinCommunity = async () => {
+          try {
+            await context.reddit.subscribeToCurrentSubreddit();
+
+            postToWebView(ACTION_NAME.JOIN_COMMUNITY, { success: true })
+          } catch (error) {
+            postToWebView(ACTION_NAME.JOIN_COMMUNITY, { success: false, error: String(error) })
+          }
+        }
+
         if (message.type === ACTION_NAME.INITIALIZE) {
           await handleInitialize()
         } else if (message.type === ACTION_NAME.SET_STORAGE_DATA) {
@@ -160,6 +171,8 @@ Devvit.addCustomPostType({
           await handleGetPurchases()
         } else if (message.type === ACTION_NAME.CREATE_POST) {
           await handleCreatePost(message)
+        } else if (message.type === ACTION_NAME.JOIN_COMMUNITY) {
+          await handleJoinCommunity()
         }
       }
     })
