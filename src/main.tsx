@@ -22,6 +22,45 @@ addPaymentHandler({
   fulfillOrder: async (order, ctx) => {},
 });
 
+Devvit.addMenuItem({
+  label: 'Create Game Post',
+  location: 'subreddit',
+  forUserType: 'moderator', // Only moderators can create the post
+  onPress: async (event, context) => {
+    const subreddit = await context.reddit.getCurrentSubreddit();
+    await context.reddit.submitPost({
+      title: 'Play the Game!',
+      subredditName: subreddit.name,
+      preview: (
+        <vstack height="100%" width="100%" alignment="middle center">
+          <text size="large">Loading Game...</text>
+        </vstack>
+      ),
+    });
+    context.ui.showToast({ text: 'Game post created successfully!' });
+  },
+});
+
+// ============================================
+// Option 2: Auto-Create Post on App Install
+// ============================================
+Devvit.addTrigger({
+  event: 'AppInstall',
+  onEvent: async (event, context) => {
+    const subreddit = await context.reddit.getCurrentSubreddit();
+    await context.reddit.submitPost({
+      title: 'Play the Game!',
+      subredditName: subreddit.name,
+      preview: (
+        <vstack height="100%" width="100%" alignment="middle center">
+          <text size="large">Loading Game...</text>
+        </vstack>
+      ),
+    });
+    console.log('Game post auto-created on app install');
+  },
+});
+
 Devvit.addCustomPostType({
   name: "Game",
   height: "regular",
@@ -44,18 +83,15 @@ Devvit.addCustomPostType({
         // initialize
         const handleInitialize = async () => {
           const currentUser = await context.reddit.getCurrentUser();
-
           const data: any = {
             isPlayerAuthorized: !!currentUser,
           }
-
           if (currentUser) {
             data.playerId = currentUser.id;
             data.playerName = currentUser.username;
             data.playerPhoto = await currentUser.getSnoovatarUrl();
           }
-          
-          postToWebView(ACTION_NAME.INITIALIZE, { success: true, ...data  })
+          postToWebView(ACTION_NAME.INITIALIZE, { success: true, ...data })
         }
 
         // storage
@@ -67,7 +103,6 @@ Devvit.addCustomPostType({
             } else {
               await context.redis.set(String(key), String(value as unknown as string));
             }
-
             postToWebView(ACTION_NAME.SET_STORAGE_DATA, { success: true })
           } catch (error) {
             postToWebView(ACTION_NAME.SET_STORAGE_DATA, { success: false, error: String(error) })
@@ -77,7 +112,6 @@ Devvit.addCustomPostType({
         const handleGetStorageData = async (message: any) => {
           const { key } = message.data;
           let result;
-
           try {
             if (Array.isArray(key)) {
               const values = await Promise.all(key.map((k) => context.redis.get(String(k))));
@@ -85,7 +119,6 @@ Devvit.addCustomPostType({
             } else {
               result = await context.redis.get(String(key)) || null
             }
-
             postToWebView(ACTION_NAME.GET_STORAGE_DATA, { success: true, data: result })
           } catch (error) {
             postToWebView(ACTION_NAME.GET_STORAGE_DATA, { success: false, error: String(error) })
@@ -100,7 +133,6 @@ Devvit.addCustomPostType({
             } else {
               await context.redis.del(String(key));
             }
-
             postToWebView(ACTION_NAME.DELETE_STORAGE_DATA, { success: true })
           } catch (error) {
             postToWebView(ACTION_NAME.DELETE_STORAGE_DATA, { success: false, error: String(error) })
@@ -116,7 +148,6 @@ Devvit.addCustomPostType({
         const handleGetCatalog = async () => {
           try {
             const products = await getProducts();
-
             postToWebView(ACTION_NAME.GET_CATALOG, { success: true, data: products })
           } catch (error) {
             postToWebView(ACTION_NAME.GET_CATALOG, { success: false, error: String(error) })
@@ -126,7 +157,6 @@ Devvit.addCustomPostType({
         const handleGetPurchases = async () => {
           try {
             const purchases = await getOrders();
-
             postToWebView(ACTION_NAME.GET_PURCHASES, { success: true, data: purchases })
           } catch (error) {
             postToWebView(ACTION_NAME.GET_PURCHASES, { success: false, error: String(error) })
@@ -138,7 +168,6 @@ Devvit.addCustomPostType({
           try {
             const { options } = message.data;
             const post = await context.reddit.submitPost(options);
-
             postToWebView(ACTION_NAME.CREATE_POST, { success: true, data: { postId: post.id, postUrl: post.url } })
           } catch (error) {
             postToWebView(ACTION_NAME.CREATE_POST, { success: false, error: String(error) })
@@ -148,7 +177,6 @@ Devvit.addCustomPostType({
         const handleJoinCommunity = async () => {
           try {
             await context.reddit.subscribeToCurrentSubreddit();
-
             postToWebView(ACTION_NAME.JOIN_COMMUNITY, { success: true })
           } catch (error) {
             postToWebView(ACTION_NAME.JOIN_COMMUNITY, { success: false, error: String(error) })
@@ -178,19 +206,8 @@ Devvit.addCustomPostType({
     })
 
     return (
-      <vstack height="100%" width="100%" gap="medium" alignment="center middle">
-        <image
-          url="logo.png"
-          description="logo"
-          imageHeight={256}
-          imageWidth={256}
-          height="48px"
-          width="48px"
-        />
-        <button
-          appearance="primary"
-          onPress={() => mount()}
-        >
+      <vstack height="100%" width="100%" alignment="middle center">
+        <button onPress={() => mount()}>
           Play
         </button>
       </vstack>
