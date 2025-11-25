@@ -41,9 +41,6 @@ Devvit.addMenuItem({
   },
 });
 
-// ============================================
-// Option 2: Auto-Create Post on App Install
-// ============================================
 Devvit.addTrigger({
   event: 'AppInstall',
   onEvent: async (event, context) => {
