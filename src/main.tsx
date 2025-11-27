@@ -25,16 +25,24 @@ addPaymentHandler({
 Devvit.addMenuItem({
   label: 'Create Game Post',
   location: 'subreddit',
-  forUserType: 'moderator', // Only moderators can create the post
+  forUserType: 'moderator',
   onPress: async (event, context) => {
     const subreddit = await context.reddit.getCurrentSubreddit();
     await context.reddit.submitPost({
       title: 'Play the Game!',
       subredditName: subreddit.name,
       preview: (
-        <vstack height="100%" width="100%" alignment="middle center">
-          <text size="large">Loading Game...</text>
-        </vstack>
+        <zstack height="100%" width="100%" alignment="middle center">
+          <image
+            url="background.png"
+            imageWidth={800}
+            imageHeight={400}
+            width="100%"
+            height="100%"
+            resizeMode="cover"
+          />
+          <text size="large" color="white">Loading Game...</text>
+        </zstack>
       ),
     });
     context.ui.showToast({ text: 'Game post created successfully!' });
@@ -49,9 +57,17 @@ Devvit.addTrigger({
       title: 'Play the Game!',
       subredditName: subreddit.name,
       preview: (
-        <vstack height="100%" width="100%" alignment="middle center">
-          <text size="large">Loading Game...</text>
-        </vstack>
+        <zstack height="100%" width="100%" alignment="middle center">
+          <image
+            url="background.png"
+            imageWidth={800}
+            imageHeight={400}
+            width="100%"
+            height="100%"
+            resizeMode="cover"
+          />
+          <text size="large" color="white">Loading Game...</text>
+        </zstack>
       ),
     });
     console.log('Game post auto-created on app install');
@@ -77,7 +93,6 @@ Devvit.addCustomPostType({
     const { mount, postMessage } = useWebView({
       url: "game/index.html",
       onMessage: async (message: any) => {
-        // initialize
         const handleInitialize = async () => {
           const currentUser = await context.reddit.getCurrentUser();
           const data: any = {
@@ -91,7 +106,6 @@ Devvit.addCustomPostType({
           postToWebView(ACTION_NAME.INITIALIZE, { success: true, ...data })
         }
 
-        // storage
         const handleSetStorageData = async (message: any) => {
           try {
             const { key, value } = message.data;
@@ -136,7 +150,6 @@ Devvit.addCustomPostType({
           }
         }
 
-        // payments
         const handlePurchase = async (message: any) => {
           const { id } = message.data;
           payments.purchase(id)
@@ -160,7 +173,6 @@ Devvit.addCustomPostType({
           }
         }
 
-        // social
         const handleCreatePost = async (message: any) => {
           try {
             const { options } = message.data;
@@ -203,11 +215,24 @@ Devvit.addCustomPostType({
     })
 
     return (
-      <vstack height="100%" width="100%" alignment="middle center">
-        <button onPress={() => mount()}>
-          Play
-        </button>
-      </vstack>
+      <zstack height="100%" width="100%" alignment="middle center">
+        <image
+          url="background.png"
+          imageWidth={800}
+          imageHeight={400}
+          width="100%"
+          height="100%"
+          resizeMode="cover"
+        />
+        <hstack
+          backgroundColor="#9648ff"
+          padding="medium"
+          cornerRadius="medium"
+          onPress={() => mount()}
+        >
+          <text size="xlarge" color="white" weight="bold">Play</text>
+        </hstack>
+      </zstack>
     );
   },
 });
