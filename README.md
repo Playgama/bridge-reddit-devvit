@@ -25,6 +25,7 @@ It enables Playgama Bridge integrated HTML5 games to run as Reddit Apps, offerin
 + [Discord](https://discord.com/gaming)
 + [BitQuest](https://t.me/BitquestGamesBot/start)
 + [Huawei](https://consumer.huawei.com/en/mobileservices/appgallery)
++ [Microsoft Store](https://apps.microsoft.com)
 + Other [Work In Progress]
 
 ## Plugins for game engines
