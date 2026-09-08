@@ -1,0 +1,37 @@
+{
+    "platforms": {
+        "reddit": {}
+    },
+    "advertisement": {
+        "interstitial": {
+            "preloadOnStart": false
+        },
+        "rewarded": {
+            "preloadOnStart": false
+        },
+        "useBuiltInErrorPopup": true,
+        "backfillId": ""
+    },
+    "payments": [
+        {
+            "id": "coins_small",
+            "reddit": { "id": "coins_small" }
+        },
+        {
+            "id": "coins_large",
+            "reddit": { "id": "coins_large" }
+        },
+        {
+            "id": "remove_ads",
+            "reddit": { "id": "remove_ads" }
+        }
+    ],
+    "leaderboards": [
+        {
+            "id": "main",
+            "isMain": true,
+            "reddit": "main"
+        }
+    ],
+    "sendAnalyticsEvents": true
+}

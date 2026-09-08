@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Playgama Bridge — Reddit Test Bench</title>
+            </head>
+    <body>
+        <header class="brand">
+            <div class="brand__left">
+                <div class="brand__logo">B</div>
+                <div class="brand__name">BRIDGE</div>
+            </div>
+            <div class="status-bar">
+                <span class="pill" id="meta-version">version <strong>?</strong></span>
+                <span class="pill" id="meta-platform">platform <strong>?</strong></span>
+                <span class="pill" id="meta-engine">engine <strong>?</strong></span>
+                <span class="pill" id="meta-status">status <strong>loading</strong></span>
+            </div>
+        </header>
+
+        <main class="modules">
+            <!-- ============ PLATFORM ============ -->
+            <section class="module module--platform" id="platform-section">
+                <h2 class="module__title">Platform</h2>
+                <div class="kv">
+                    <div class="kv__row"><span class="kv__key">Platform ID:</span><span class="kv__val" id="platform-id">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Language:</span><span class="kv__val" id="platform-language">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Payload:</span><span class="kv__val" id="platform-payload">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Launch Data:</span><span class="kv__val" id="platform-launch-data">?</span></div>
+                    <div class="kv__row"><span class="kv__key">TLD:</span><span class="kv__val" id="platform-tld">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Is Audio Enabled:</span><span class="kv__val" id="platform-audio">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Is Paused:</span><span class="kv__val" id="platform-paused">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Launch Source:</span><span class="kv__val" id="platform-launch-source">?</span></div>
+                    <div class="kv__row"><span class="kv__key">External Calls Supported:</span><span class="kv__val" id="platform-external-calls">?</span></div>
+                    <div class="kv__row"><span class="kv__key">External Links Allowed:</span><span class="kv__val" id="platform-external-links">?</span></div>
+                </div>
+
+                <div class="subhead">Send Message</div>
+                <div class="actions">
+                    <button class="action" data-message="game_ready">
+                        <span class="action__icon">🏁</span>
+                        <span class="action__label">SEND GAME
+READY</span>
+                    </button>
+                    <button class="action" data-message="level_started">
+                        <span class="action__icon">▶️</span>
+                        <span class="action__label">LEVEL
+STARTED</span>
+                    </button>
+                    <button class="action" data-message="level_completed">
+                        <span class="action__icon">✅</span>
+                        <span class="action__label">LEVEL
+COMPLETED</span>
+                    </button>
+                    <button class="action" data-message="level_failed">
+                        <span class="action__icon">💩</span>
+                        <span class="action__label">LEVEL
+FAILED</span>
+                    </button>
+                    <button class="action" data-message="level_paused">
+                        <span class="action__icon">⏸️</span>
+                        <span class="action__label">LEVEL
+PAUSED</span>
+                    </button>
+                    <button class="action" data-message="level_resumed">
+                        <span class="action__icon">↪️</span>
+                        <span class="action__label">LEVEL
+RESUMED</span>
+                    </button>
+                    <button class="action" data-message="in_game_loading_started">
+                        <span class="action__icon">⏳</span>
+                        <span class="action__label">IN-GAME
+LOAD START</span>
+                    </button>
+                    <button class="action" data-message="in_game_loading_stopped">
+                        <span class="action__icon">⌛</span>
+                        <span class="action__label">IN-GAME
+LOAD STOP</span>
+                    </button>
+                    <button class="action" data-message="gameplay_started">
+                        <span class="action__icon">🎮</span>
+                        <span class="action__label">GAMEPLAY
+STARTED</span>
+                    </button>
+                    <button class="action" data-message="gameplay_stopped">
+                        <span class="action__icon">🛑</span>
+                        <span class="action__label">GAMEPLAY
+STOPPED</span>
+                    </button>
+                    <button class="action" data-message="player_got_achievement">
+                        <span class="action__icon">🏆</span>
+                        <span class="action__label">PLAYER GOT
+ACHIEVEMENT</span>
+                    </button>
+                </div>
+                <div class="row" style="margin-top: 4px">
+                    <span class="status" id="platform-send-message-status"></span>
+                </div>
+
+                <div class="subhead">Custom Message</div>
+                <div class="row">
+                    <input type="text" id="platform-custom-id" placeholder="custom message id" />
+                    <input type="text" id="platform-custom-options" placeholder='options JSON e.g. {"foo":1}' />
+                    <button class="btn" id="platform-send-custom-btn">Send Custom</button>
+                </div>
+
+                <div class="subhead">Server Time</div>
+                <div class="row">
+                    <button class="btn" id="platform-server-time-btn">Get Server Time</button>
+                    <span class="kv__val" id="platform-server-time">Not requested</span>
+                </div>
+
+            </section>
+
+            <!-- ============ DEVICE ============ -->
+            <section class="module module--device" id="device-section">
+                <h2 class="module__title">Device</h2>
+                <div class="kv">
+                    <div class="kv__row"><span class="kv__key">Type:</span><span class="kv__val" id="device-type">?</span></div>
+                    <div class="kv__row"><span class="kv__key">OS:</span><span class="kv__val" id="device-os">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Orientation:</span><span class="kv__val" id="device-orientation">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Safe Area:</span><span class="kv__val" id="device-safearea">?</span></div>
+                </div>
+                <div class="subhead">Orientation Log</div>
+                <pre id="device-orientation-log" class="output"></pre>
+                <div class="subhead">Screen Size Log</div>
+                <pre id="device-screen-log" class="output"></pre>
+            </section>
+
+            <!-- ============ GAME ============ -->
+            <section class="module module--game" id="game-section">
+                <h2 class="module__title">Game</h2>
+                <p class="muted">v2 — <code>bridge.game</code> module removed; loading progress now lives on the top-level <code>bridge.setGameLoadingProgress()</code>; pause state via <code>bridge.platform.isPaused</code> + <code>bridge.on('pause_state_changed', …)</code>.</p>
+                <div class="subhead">Set Loading Progress</div>
+                <div class="row">
+                    <input type="number" id="game-progress-input" placeholder="0–100" min="0" max="100" />
+                    <button class="btn" id="game-progress-btn">Set Progress</button>
+                </div>
+            </section>
+
+            <!-- ============ STORAGE ============ -->
+            <section class="module module--storage" id="storage-section">
+                <h2 class="module__title">Storage</h2>
+                <p class="muted">v2 — <code>storageType</code> arg removed from <code>get/set/delete</code>; routing uses platform's internal <code>defaultStorageType</code> + <code>cloudStorageMode</code>.</p>
+                <div class="subhead">Data</div>
+                <div class="row">
+                    <label class="storage-toggle">
+                        <input type="checkbox" id="storage-try-parse-json" checked />
+                        <span>tryParseJson on GET</span>
+                    </label>
+                </div>
+                <div id="storage-rows" class="storage-rows"></div>
+                <div class="row">
+                    <button class="btn btn--ghost" id="storage-add-row-btn" type="button">+ ADD ROW</button>
+                    <span class="muted">value: raw string, or JSON (object / array / number / bool / null)</span>
+                </div>
+                <div class="actions">
+                    <button class="action" id="storage-get-btn">
+                        <span class="action__icon">⬇️</span>
+                        <span class="action__label">GET
+DATA</span>
+                    </button>
+                    <button class="action" id="storage-set-btn">
+                        <span class="action__icon">⬆️</span>
+                        <span class="action__label">SET
+DATA</span>
+                    </button>
+                    <button class="action" id="storage-delete-btn">
+                        <span class="action__icon">🗑️</span>
+                        <span class="action__label">DELETE
+DATA</span>
+                    </button>
+                </div>
+                <pre id="storage-output" class="output"></pre>
+            </section>
+
+            <!-- ============ ADVERTISEMENT ============ -->
+            <section class="module module--advertisement" id="advertisement-section">
+                <h2 class="module__title">Advertisement</h2>
+                <div class="kv">
+                    <div class="kv__row"><span class="kv__key">Banner:</span><span class="kv__val" id="ad-banner-supported">?</span><span class="kv__key">·</span><span class="kv__key">state:</span><span class="kv__val" id="ad-banner-state">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Interstitial:</span><span class="kv__val" id="ad-interstitial-supported">?</span><span class="kv__key">·</span><span class="kv__key">state:</span><span class="kv__val" id="ad-interstitial-state">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Rewarded:</span><span class="kv__val" id="ad-rewarded-supported">?</span><span class="kv__key">·</span><span class="kv__key">state:</span><span class="kv__val" id="ad-rewarded-state">?</span><span class="kv__key">·</span><span class="kv__key">placement:</span><span class="kv__val" id="ad-rewarded-placement">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Advanced Banners:</span><span class="kv__val" id="ad-advanced-supported">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Min Delay (s):</span><span class="kv__val" id="ad-min-delay">?</span></div>
+                    <div class="kv__row"><span class="kv__key">AdBlock:</span><span class="kv__val" id="ad-adblock">?</span></div>
+                </div>
+
+                <div class="subhead">Min Delay</div>
+                <div class="row">
+                    <input type="number" id="ad-min-delay-input" placeholder="seconds" />
+                    <button class="btn" id="ad-set-min-delay">Set Min Delay</button>
+                </div>
+
+                <div class="subhead">Banner</div>
+                <div class="row">
+                    <select id="ad-banner-position">
+                        <option value="bottom">bottom</option>
+                        <option value="top">top</option>
+                    </select>
+                    <input type="text" id="ad-banner-placement" placeholder="placement (optional)" />
+                </div>
+                <div class="actions">
+                    <button class="action" id="ad-show-banner">
+                        <span class="action__icon">📺</span>
+                        <span class="action__label">SHOW
+BANNER</span>
+                    </button>
+                    <button class="action" id="ad-hide-banner">
+                        <span class="action__icon">🙈</span>
+                        <span class="action__label">HIDE
+BANNER</span>
+                    </button>
+                </div>
+
+                <div class="subhead">Interstitial</div>
+                <div class="row">
+                    <input type="text" id="ad-interstitial-placement" placeholder="placement (optional)" />
+                </div>
+                <div class="actions">
+                    <button class="action" id="ad-preload-interstitial">
+                        <span class="action__icon">⏬</span>
+                        <span class="action__label">PRELOAD
+INTERSTITIAL</span>
+                    </button>
+                    <button class="action" id="ad-show-interstitial">
+                        <span class="action__icon">📣</span>
+                        <span class="action__label">SHOW
+INTERSTITIAL</span>
+                    </button>
+                </div>
+
+                <div class="subhead">Rewarded</div>
+                <div class="row">
+                    <input type="text" id="ad-rewarded-placement-input" placeholder="placement (optional)" />
+                </div>
+                <div class="actions">
+                    <button class="action" id="ad-preload-rewarded">
+                        <span class="action__icon">⏬</span>
+                        <span class="action__label">PRELOAD
+REWARDED</span>
+                    </button>
+                    <button class="action" id="ad-show-rewarded">
+                        <span class="action__icon">🎁</span>
+                        <span class="action__label">SHOW
+REWARDED</span>
+                    </button>
+                </div>
+
+                <div class="subhead">Advanced Banners</div>
+                <div class="row">
+                    <input type="text" id="ad-advanced-placement" placeholder="advanced placement" />
+                </div>
+                <div class="actions">
+                    <button class="action" id="ad-show-advanced">
+                        <span class="action__icon">🪧</span>
+                        <span class="action__label">SHOW
+ADVANCED</span>
+                    </button>
+                    <button class="action" id="ad-hide-advanced">
+                        <span class="action__icon">🚫</span>
+                        <span class="action__label">HIDE
+ADVANCED</span>
+                    </button>
+                </div>
+
+                <div class="subhead">AdBlock</div>
+                <div class="row">
+                    <button class="btn" id="ad-check-adblock">Check AdBlock</button>
+                </div>
+
+                <div class="subhead">State Log</div>
+                <pre id="ad-event-log" class="output"></pre>
+            </section>
+
+            <!-- ============ PLAYER ============ -->
+            <section class="module module--player" id="player-section">
+                <h2 class="module__title">Player</h2>
+                <div class="kv">
+                    <div class="kv__row"><span class="kv__key">Is Authorization Supported:</span><span class="kv__val" id="player-auth-supported">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Is Authorized:</span><span class="kv__val" id="player-authorized">?</span></div>
+                    <div class="kv__row"><span class="kv__key">ID:</span><span class="kv__val" id="player-id">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Name:</span><span class="kv__val" id="player-name">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Photos:</span><span class="kv__val" id="player-photos">?</span></div>
+                </div>
+                <div class="row">
+                    <button class="btn" id="player-authorize-btn">Authorize</button>
+                </div>
+                <pre id="player-extra" class="output"></pre>
+            </section>
+
+            <!-- ============ SOCIAL ============ -->
+            <section class="module module--social" id="social-section">
+                <h2 class="module__title">Social</h2>
+                <div class="kv">
+                    <div class="kv__row"><span class="kv__key">Share:</span><span class="kv__val" id="social-share-supported">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Invite Friends:</span><span class="kv__val" id="social-invite-supported">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Join Community:</span><span class="kv__val" id="social-join-supported">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Create Post:</span><span class="kv__val" id="social-create-post-supported">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Add To Home Screen:</span><span class="kv__val" id="social-home-supported">?</span><span class="kv__key">· reward:</span><span class="kv__val" id="social-home-reward-supported">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Add To Favorites:</span><span class="kv__val" id="social-fav-supported">?</span><span class="kv__key">· reward:</span><span class="kv__val" id="social-fav-reward-supported">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Rate:</span><span class="kv__val" id="social-rate-supported">?</span></div>
+                </div>
+
+                <div class="subhead">Share (comment under the current post)</div>
+                <div class="row">
+                    <input type="text" id="social-share-text" placeholder="comment text, e.g. I scored 5000!" />
+                </div>
+                <div class="subhead">Create Post (new post running this app)</div>
+                <div class="row">
+                    <input type="text" id="social-post-title" placeholder="post title" />
+                    <input type="text" id="social-post-data" placeholder='data JSON attached to the post, e.g. {"level":42}' />
+                    <label class="muted"><input type="checkbox" id="social-post-claimable" /> claimable</label>
+                </div>
+                <div class="subhead">Claim (open a claimable post first) · Inbox (claims on my posts)</div>
+                <div class="kv">
+                    <div class="kv__row"><span class="kv__key">Claim supported:</span><span class="kv__val" id="social-claim-supported">?</span></div>
+                </div>
+                <div class="row">
+                    <input type="number" id="social-claim-cooldown" placeholder="cooldown, seconds (0 = once)" />
+                    <select id="social-claim-scope">
+                        <option value="user">scope: user</option>
+                        <option value="post">scope: post</option>
+                    </select>
+                </div>
+
+                <div class="actions">
+                    <button class="action" id="social-share-btn">
+                        <span class="action__icon">🔗</span>
+                        <span class="action__label">SHARE</span>
+                    </button>
+                    <button class="action" id="social-invite-btn">
+                        <span class="action__icon">📨</span>
+                        <span class="action__label">INVITE
+FRIENDS</span>
+                    </button>
+                    <button class="action" id="social-join-btn">
+                        <span class="action__icon">👥</span>
+                        <span class="action__label">JOIN
+COMMUNITY</span>
+                    </button>
+                    <button class="action" id="social-post-btn">
+                        <span class="action__icon">📝</span>
+                        <span class="action__label">CREATE
+POST</span>
+                    </button>
+                    <button class="action" id="social-home-btn">
+                        <span class="action__icon">🏠</span>
+                        <span class="action__label">ADD TO
+HOME SCREEN</span>
+                    </button>
+                    <button class="action" id="social-home-reward-btn">
+                        <span class="action__icon">🎁</span>
+                        <span class="action__label">HOME SCREEN
+REWARD</span>
+                    </button>
+                    <button class="action" id="social-fav-btn">
+                        <span class="action__icon">⭐</span>
+                        <span class="action__label">ADD TO
+FAVORITES</span>
+                    </button>
+                    <button class="action" id="social-fav-reward-btn">
+                        <span class="action__icon">🎁</span>
+                        <span class="action__label">FAVORITES
+REWARD</span>
+                    </button>
+                    <button class="action" id="social-rate-btn">
+                        <span class="action__icon">⭐</span>
+                        <span class="action__label">RATE</span>
+                    </button>
+                    <button class="action" id="social-claim-btn">
+                        <span class="action__icon">🤝</span>
+                        <span class="action__label">CLAIM</span>
+                    </button>
+                    <button class="action" id="social-inbox-btn">
+                        <span class="action__icon">📥</span>
+                        <span class="action__label">GET
+INBOX</span>
+                    </button>
+                    <button class="action" id="social-inbox-ack-btn">
+                        <span class="action__icon">✅</span>
+                        <span class="action__label">ACK
+INBOX</span>
+                    </button>
+                </div>
+                <pre id="social-output" class="output"></pre>
+            </section>
+
+            <!-- ============ LEADERBOARDS ============ -->
+            <section class="module module--leaderboards" id="leaderboards-section">
+                <h2 class="module__title">Leaderboards</h2>
+                <div class="kv">
+                    <div class="kv__row"><span class="kv__key">Type:</span><span class="kv__val" id="lb-type">?</span></div>
+                </div>
+                <div class="subhead">Inputs</div>
+                <div class="row">
+                    <input type="text" id="lb-id" placeholder="leaderboard id" />
+                    <input type="number" id="lb-score" placeholder="score" />
+                </div>
+                <div class="actions">
+                    <button class="action" id="lb-set-score-btn">
+                        <span class="action__icon">📤</span>
+                        <span class="action__label">SET
+SCORE</span>
+                    </button>
+                    <button class="action" id="lb-get-entries-btn">
+                        <span class="action__icon">📥</span>
+                        <span class="action__label">GET
+ENTRIES</span>
+                    </button>
+                    <button class="action" id="lb-show-popup-btn">
+                        <span class="action__icon">🏆</span>
+                        <span class="action__label">SHOW NATIVE
+POPUP</span>
+                    </button>
+                </div>
+                <pre id="lb-output" class="output"></pre>
+            </section>
+
+            <!-- ============ PAYMENTS ============ -->
+            <section class="module module--payments" id="payments-section">
+                <h2 class="module__title">Payments</h2>
+                <div class="kv">
+                    <div class="kv__row"><span class="kv__key">Is Supported:</span><span class="kv__val" id="pay-supported">?</span></div>
+                </div>
+                <div class="subhead">Store</div>
+                <div class="store" id="pay-store">
+                    <span class="muted">Press LOAD STORE to list products from the catalog.</span>
+                </div>
+                <div class="subhead">Product</div>
+                <div class="row">
+                    <input type="text" id="pay-id" placeholder="product id" />
+                </div>
+                <div class="actions">
+                    <button class="action" id="pay-load-store-btn">
+                        <span class="action__icon">🛒</span>
+                        <span class="action__label">LOAD
+STORE</span>
+                    </button>
+                    <button class="action" id="pay-get-purchases-btn">
+                        <span class="action__icon">📥</span>
+                        <span class="action__label">GET
+PURCHASES</span>
+                    </button>
+                    <button class="action" id="pay-get-catalog-btn">
+                        <span class="action__icon">📚</span>
+                        <span class="action__label">GET
+CATALOG</span>
+                    </button>
+                    <button class="action" id="pay-purchase-btn">
+                        <span class="action__icon">💳</span>
+                        <span class="action__label">PURCHASE</span>
+                    </button>
+                    <button class="action" id="pay-consume-btn">
+                        <span class="action__icon">✅</span>
+                        <span class="action__label">CONSUME
+PURCHASE</span>
+                    </button>
+                </div>
+                <pre id="pay-output" class="output"></pre>
+            </section>
+
+            <!-- ============ ACHIEVEMENTS ============ -->
+            <section class="module module--achievements" id="achievements-section">
+                <h2 class="module__title">Achievements</h2>
+                <p class="muted">v2 — <code>unlock(id: string)</code> and <code>getAchievements()</code>; the <code>isSupported</code>/<code>isGetListSupported</code>/<code>isNativePopupSupported</code> flags and <code>showNativePopup</code> were removed.</p>
+                <div class="subhead">Inputs</div>
+                <div class="row">
+                    <input type="text" id="ach-id" placeholder="achievement id" />
+                </div>
+                <div class="actions">
+                    <button class="action" id="ach-list-btn">
+                        <span class="action__icon">📋</span>
+                        <span class="action__label">GET
+ACHIEVEMENTS</span>
+                    </button>
+                    <button class="action" id="ach-unlock-btn">
+                        <span class="action__icon">🔓</span>
+                        <span class="action__label">UNLOCK</span>
+                    </button>
+                </div>
+                <pre id="ach-output" class="output"></pre>
+            </section>
+
+            <!-- ============ REMOTE CONFIG ============ -->
+            <section class="module module--remote-config" id="remote-config-section">
+                <h2 class="module__title">Remote Config</h2>
+                <div class="kv">
+                    <div class="kv__row"><span class="kv__key">Is Supported:</span><span class="kv__val" id="rc-supported">?</span></div>
+                </div>
+                <div class="subhead">Set Context</div>
+                <div class="row">
+                    <input type="text" id="rc-context" placeholder='{"level":5}' />
+                    <button class="btn" id="rc-set-context-btn">Set Context</button>
+                </div>
+                <div class="subhead">Get</div>
+                <div class="row">
+                    <button class="btn" id="rc-get-btn">Get Config</button>
+                </div>
+                <pre id="rc-output" class="output"></pre>
+            </section>
+
+            <!-- ============ CLIPBOARD ============ -->
+            <section class="module module--clipboard" id="clipboard-section">
+                <h2 class="module__title">Clipboard</h2>
+                <div class="kv">
+                    <div class="kv__row"><span class="kv__key">Is Supported:</span><span class="kv__val" id="clip-supported">?</span></div>
+                </div>
+                <div class="subhead">Text</div>
+                <div class="row">
+                    <input type="text" id="clip-input" placeholder="text" />
+                </div>
+                <div class="actions">
+                    <button class="action" id="clip-read-btn">
+                        <span class="action__icon">📥</span>
+                        <span class="action__label">READ</span>
+                    </button>
+                    <button class="action" id="clip-write-btn">
+                        <span class="action__icon">📤</span>
+                        <span class="action__label">WRITE</span>
+                    </button>
+                </div>
+                <pre id="clip-output" class="output"></pre>
+            </section>
+
+            <!-- ============ ANALYTICS ============ -->
+            <section class="module module--analytics" id="analytics-section">
+                <h2 class="module__title">Analytics</h2>
+                <div class="subhead">Send Event</div>
+                <div class="row">
+                    <input type="text" id="an-event" placeholder="event name" />
+                    <input type="text" id="an-data" placeholder='data JSON e.g. {"score":42}' />
+                    <button class="btn" id="an-send-btn">Send</button>
+                </div>
+                <pre id="an-output" class="output"></pre>
+            </section>
+
+            <!-- ============ EVENTS ============ -->
+            <section class="module module--events" id="events-section">
+                <h2 class="module__title">Bridge Events</h2>
+                <p class="muted">Live tail of every <code>EVENT_NAME.*</code> emitted on bridge + main modules.</p>
+                <pre id="events-log" class="output output--tall"></pre>
+                <div class="row">
+                    <button class="btn btn--ghost" id="events-clear-btn">Clear</button>
+                </div>
+            </section>
+        </main>
+
+        <script type="module" src="main.ts"></script>
+    </body>
+</html>
