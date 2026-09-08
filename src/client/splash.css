@@ -1,0 +1,168 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #1a1a2e;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Put the game's key art here: background: … url('/background.png') center / cover */
+.splash-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 14px;
+  padding: 16px;
+  background: linear-gradient(180deg, #1a1a2e 0%, #2d1b4e 100%);
+  --accent: #9648ff;
+}
+
+/* A post created with data.preview: the accent comes from preview.accent when set */
+.splash-container--post .splash-title {
+  color: var(--accent);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--accent) 55%, transparent), 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+.splash-image {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.splash-title {
+  font-size: clamp(1.6em, 6vw, 2.8em);
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 4px 16px rgba(0, 0, 0, 0.6);
+  text-align: center;
+}
+
+.splash-subtitle {
+  font-size: clamp(0.8em, 2.5vw, 1.1em);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  opacity: 0.85;
+  margin-top: -6px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.play-button {
+  background: var(--accent);
+  color: #ffffff;
+  padding: 14px 40px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 1.15em;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 50%, transparent);
+  transition: filter 0.15s ease, transform 0.1s ease;
+  margin-top: 6px;
+}
+
+.splash-container--post .play-button {
+  color: #1a1a1a;
+}
+
+.play-button:hover {
+  filter: brightness(1.1);
+}
+
+.play-button:active {
+  transform: scale(0.97);
+}
+
+.play-button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.splash-hint {
+  font-size: 0.75em;
+  opacity: 0.65;
+  letter-spacing: 0.04em;
+}
+
+.splash-timer {
+  font-size: clamp(1em, 3.5vw, 1.4em);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  margin-top: -6px;
+}
+
+/* Viewer's Snoovatar (from /api/initialize playerPhoto) */
+.splash-player {
+  position: absolute;
+  left: 18px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+  animation: splash-player-in 0.5s ease-out both;
+}
+
+.splash-player__avatar {
+  height: clamp(110px, 32vh, 190px);
+  width: auto;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.55));
+}
+
+.splash-player__name {
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes splash-player-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 520px) {
+  .splash-player__avatar {
+    height: 90px;
+  }
+  .splash-player {
+    left: 10px;
+    bottom: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play-button {
+    transition: none;
+  }
+  .splash-player {
+    animation: none;
+  }
+}

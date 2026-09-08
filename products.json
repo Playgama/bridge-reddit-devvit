@@ -1,0 +1,26 @@
+{
+  "$schema": "https://developers.reddit.com/schema/products.json",
+  "products": [
+    {
+      "sku": "coins_small",
+      "displayName": "Handful of Coins",
+      "description": "100 coins",
+      "price": 5,
+      "accountingType": "CONSUMABLE"
+    },
+    {
+      "sku": "coins_large",
+      "displayName": "Bag of Coins",
+      "description": "1000 coins",
+      "price": 25,
+      "accountingType": "CONSUMABLE"
+    },
+    {
+      "sku": "remove_ads",
+      "displayName": "Remove Ads",
+      "description": "Removes all advertisement forever",
+      "price": 50,
+      "accountingType": "DURABLE"
+    }
+  ]
+}

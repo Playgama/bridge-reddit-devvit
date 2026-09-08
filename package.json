@@ -5,23 +5,23 @@
   "license": "BSD-3-Clause",
   "type": "module",
   "scripts": {
-    "init": "npm create devvit",
-    "deploy": "devvit upload",
     "dev": "dotenv -e .env -- devvit playtest",
     "dev:bridge": "devvit playtest r/pg_bridge_dev2",
-    "login": "devvit login",
+    "build": "vite build",
+    "deploy": "devvit upload",
     "launch": "devvit publish",
+    "login": "devvit login",
     "type-check": "tsc --build"
   },
   "dependencies": {
-    "@devvit/payments": "^0.12.0",
-    "@devvit/public-api": "0.12.0",
-    "@devvit/web": "0.12.0",
+    "@devvit/web": "0.14.2",
     "express": "^5.1.0"
   },
   "devDependencies": {
+    "@devvit/start": "0.14.2",
     "@types/express": "^5.0.3",
-    "devvit": "0.12.0",
+    "@types/node": "^24.7.0",
+    "devvit": "0.14.2",
     "dotenv-cli": "8.0.0",
     "typescript": "5.8.3",
     "vite": "^7.1.9"

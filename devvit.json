@@ -1,0 +1,56 @@
+{
+  "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
+  "name": "bridge-devvit",
+  "post": {
+    "dir": "dist/client",
+    "entrypoints": {
+      "default": {
+        "entry": "splash.html",
+        "height": "regular"
+      },
+      "game": {
+        "entry": "index.html",
+        "height": "tall"
+      }
+    }
+  },
+  "server": {
+    "dir": "dist/server",
+    "entry": "index.cjs"
+  },
+  "permissions": {
+    "redis": true,
+    "reddit": {
+      "enable": true,
+      "scope": "user"
+    },
+    "payments": true
+  },
+  "payments": {
+    "productsFile": "./products.json",
+    "endpoints": {
+      "fulfillOrder": "/internal/payments/fulfill"
+    }
+  },
+  "triggers": {
+    "onAppInstall": "/internal/triggers/app-install"
+  },
+  "menu": {
+    "items": [
+      {
+        "label": "Create Game Post",
+        "description": "Post a new game to this community",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/create-post"
+      }
+    ]
+  },
+  "marketingAssets": {
+    "icon": "assets/icon.png"
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build"
+  }
+}

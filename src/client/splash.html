@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Playgama Bridge</title>
+  <link rel="stylesheet" href="splash.css" />
+</head>
+<body>
+  <div id="splash" class="splash-container">
+    <img id="splash-image" class="splash-image" alt="" hidden>
+    <div id="splash-title" class="splash-title">PLAYGAMA BRIDGE</div>
+    <div id="splash-subtitle" class="splash-subtitle" hidden></div>
+    <button id="play-button" class="play-button" type="button">PLAY</button>
+    <div id="splash-hint" class="splash-hint" hidden></div>
+    <div id="splash-timer" class="splash-timer" hidden></div>
+  </div>
+  <!-- The viewer's Snoovatar, standing on the page like a character -->
+  <div id="splash-player" class="splash-player" hidden>
+    <img id="splash-player-avatar" class="splash-player__avatar" alt="">
+    <span id="splash-player-name" class="splash-player__name"></span>
+  </div>
+  <script type="module" src="splash.ts"></script>
+</body>
+</html>
