@@ -26,7 +26,7 @@ declare global {
         | 'screen_size_changed' | 'platform_message_sent'
         | 'platform_storage_availability_changed'
 
-    type LaunchSource = 'launcher' | 'notification' | 'unknown'
+    type LaunchSource = 'notification' | 'post'
 
     type InterstitialState = 'loading' | 'opened' | 'closed' | 'failed'
     type RewardedState = 'loading' | 'opened' | 'closed' | 'failed' | 'rewarded'
@@ -55,7 +55,7 @@ declare global {
         readonly sdk: unknown
         readonly language: string
         readonly payload: string | null
-        readonly launchData: LaunchData | null
+        readonly data: Record<string, unknown>
         readonly tld: string | null
         readonly launchSource: LaunchSource | null
         readonly isExternalCallsSupported: boolean
@@ -65,37 +65,6 @@ declare global {
         sendMessage(message: PlatformMessage | string, options?: Record<string, unknown>): Promise<unknown>
         sendCustomMessage(id: string, options?: Record<string, unknown>): Promise<unknown>
         getServerTime(): Promise<unknown>
-    }
-
-    interface ClaimStatus {
-        available: boolean
-        reason?: 'unauthorized' | 'own' | 'cooldown' | 'expired' | 'limit'
-        count: number
-        nextClaimAt: number | null
-        serverTime: number
-    }
-
-    interface LaunchData {
-        id: string
-        authorId: string | null
-        data: unknown
-        claimable: boolean
-        claim?: ClaimStatus
-        [key: string]: unknown
-    }
-
-    interface ClaimResult {
-        granted: boolean
-        reason?: 'unauthorized' | 'own' | 'cooldown' | 'expired' | 'limit'
-        count: number
-        nextClaimAt: number | null
-        serverTime: number
-    }
-
-    interface InboxEvent {
-        postId: string
-        from: { id: string; name: string | null }
-        at: number
     }
 
     interface PlayerModuleApi {
@@ -148,19 +117,17 @@ declare global {
         readonly isAddToFavoritesSupported: boolean
         readonly isAddToFavoritesRewardSupported: boolean
         readonly isRateSupported: boolean
-        readonly isClaimSupported: boolean
-        readonly isInboxSupported: boolean
+        readonly isPostRewardSupported: boolean
         share(options?: Record<string, unknown>): Promise<unknown>
         inviteFriends(options?: Record<string, unknown>): Promise<unknown>
         joinCommunity(options?: Record<string, unknown>): Promise<unknown>
-        createPost(options?: Record<string, unknown>): Promise<unknown>
+        createPost(options?: string | Record<string, unknown>, payload?: string): Promise<unknown>
         addToHomeScreen(): Promise<unknown>
         getAddToHomeScreenReward(): Promise<unknown>
         addToFavorites(): Promise<unknown>
         getAddToFavoritesReward(): Promise<unknown>
         rate(): Promise<unknown>
-        claim(options?: { cooldown?: number; scope?: 'user' | 'post' }): Promise<ClaimResult>
-        getInbox(options?: { ackUntil?: number }): Promise<{ events: InboxEvent[]; serverTime: number }>
+        getPostReward(): Promise<Array<{ id: string; amount: number; type: 'visit' | 'author' }>>
     }
 
     interface DeviceSafeArea {
