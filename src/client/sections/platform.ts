@@ -6,7 +6,7 @@ export function bindPlatformSection(bridge: PlaygamaBridge): void {
     setText('platform-id', p.id)
     setText('platform-language', p.language)
     setText('platform-payload', p.payload)
-    setText('platform-launch-data', p.launchData === null || p.launchData === undefined ? '—' : pretty(p.launchData))
+    setText('platform-data', pretty(p.data))
     setText('platform-tld', p.tld)
     setText('platform-launch-source', p.launchSource)
     setText('platform-audio', p.isAudioEnabled)

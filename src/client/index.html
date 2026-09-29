@@ -27,7 +27,7 @@
                     <div class="kv__row"><span class="kv__key">Platform ID:</span><span class="kv__val" id="platform-id">?</span></div>
                     <div class="kv__row"><span class="kv__key">Language:</span><span class="kv__val" id="platform-language">?</span></div>
                     <div class="kv__row"><span class="kv__key">Payload:</span><span class="kv__val" id="platform-payload">?</span></div>
-                    <div class="kv__row"><span class="kv__key">Launch Data:</span><span class="kv__val" id="platform-launch-data">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Launch Data:</span><span class="kv__val" id="platform-data">?</span></div>
                     <div class="kv__row"><span class="kv__key">TLD:</span><span class="kv__val" id="platform-tld">?</span></div>
                     <div class="kv__row"><span class="kv__key">Is Audio Enabled:</span><span class="kv__val" id="platform-audio">?</span></div>
                     <div class="kv__row"><span class="kv__key">Is Paused:</span><span class="kv__val" id="platform-paused">?</span></div>
@@ -301,6 +301,7 @@ ADVANCED</span>
                     <div class="kv__row"><span class="kv__key">Add To Home Screen:</span><span class="kv__val" id="social-home-supported">?</span><span class="kv__key">· reward:</span><span class="kv__val" id="social-home-reward-supported">?</span></div>
                     <div class="kv__row"><span class="kv__key">Add To Favorites:</span><span class="kv__val" id="social-fav-supported">?</span><span class="kv__key">· reward:</span><span class="kv__val" id="social-fav-reward-supported">?</span></div>
                     <div class="kv__row"><span class="kv__key">Rate:</span><span class="kv__val" id="social-rate-supported">?</span></div>
+                    <div class="kv__row"><span class="kv__key">Post Reward:</span><span class="kv__val" id="social-post-reward-supported">?</span></div>
                 </div>
 
                 <div class="subhead">Share (comment under the current post)</div>
@@ -309,21 +310,11 @@ ADVANCED</span>
                 </div>
                 <div class="subhead">Create Post (new post running this app)</div>
                 <div class="row">
-                    <input type="text" id="social-post-title" placeholder="post title" />
-                    <input type="text" id="social-post-data" placeholder='data JSON attached to the post, e.g. {"level":42}' />
-                    <label class="muted"><input type="checkbox" id="social-post-claimable" /> claimable</label>
+                    <input type="text" id="social-post-id" placeholder="post id from the config posts section, e.g. gift" />
+                    <input type="text" id="social-post-title" placeholder="post title, used when there is no post id" />
+                    <input type="text" id="social-post-payload" placeholder='payload for this one post, e.g. {"level":42}' />
                 </div>
-                <div class="subhead">Claim (open a claimable post first) · Inbox (claims on my posts)</div>
-                <div class="kv">
-                    <div class="kv__row"><span class="kv__key">Claim supported:</span><span class="kv__val" id="social-claim-supported">?</span></div>
-                </div>
-                <div class="row">
-                    <input type="number" id="social-claim-cooldown" placeholder="cooldown, seconds (0 = once)" />
-                    <select id="social-claim-scope">
-                        <option value="user">scope: user</option>
-                        <option value="post">scope: post</option>
-                    </select>
-                </div>
+                <div class="subhead">Post Reward (inside a post it is the visit reward, elsewhere the author's)</div>
 
                 <div class="actions">
                     <button class="action" id="social-share-btn">
@@ -369,19 +360,10 @@ REWARD</span>
                         <span class="action__icon">⭐</span>
                         <span class="action__label">RATE</span>
                     </button>
-                    <button class="action" id="social-claim-btn">
-                        <span class="action__icon">🤝</span>
-                        <span class="action__label">CLAIM</span>
-                    </button>
-                    <button class="action" id="social-inbox-btn">
-                        <span class="action__icon">📥</span>
-                        <span class="action__label">GET
-INBOX</span>
-                    </button>
-                    <button class="action" id="social-inbox-ack-btn">
-                        <span class="action__icon">✅</span>
-                        <span class="action__label">ACK
-INBOX</span>
+                    <button class="action" id="social-post-reward-btn">
+                        <span class="action__icon">🎁</span>
+                        <span class="action__label">POST
+REWARD</span>
                     </button>
                 </div>
                 <pre id="social-output" class="output"></pre>

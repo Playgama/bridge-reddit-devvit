@@ -26,6 +26,19 @@
             "reddit": { "id": "remove_ads" }
         }
     ],
+    "posts": [
+        {
+            "id": "gift",
+            "text": "I'm sharing coins!",
+            "rewards": [
+                { "id": "coins", "amount": 100 },
+                { "id": "coins", "amount": 50, "type": "author" }
+            ],
+            "rewardCooldown": 14400,
+            "card": { "title": "+100 COINS", "button": "GET COINS", "accent": "#ffd700" },
+            "reddit": { "text": "🎁 Free coins inside" }
+        }
+    ],
     "leaderboards": [
         {
             "id": "main",

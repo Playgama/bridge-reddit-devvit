@@ -27,20 +27,13 @@ body {
   --accent: #9648ff;
 }
 
-/* A post created with data.preview: the accent comes from preview.accent when set */
-.splash-container--post .splash-title {
-  color: var(--accent);
-  text-shadow: 0 0 24px color-mix(in srgb, var(--accent) 55%, transparent), 0 4px 16px rgba(0, 0, 0, 0.6);
-}
+
 
 .splash-image {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.35);
-  border: 2px solid var(--accent);
-  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 45%, transparent);
+  width: clamp(64px, 22vw, 128px);
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
 }
 
 .splash-title {
@@ -51,14 +44,6 @@ body {
   text-align: center;
 }
 
-.splash-subtitle {
-  font-size: clamp(0.8em, 2.5vw, 1.1em);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  opacity: 0.85;
-  margin-top: -6px;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
-}
 
 .play-button {
   background: var(--accent);
@@ -75,9 +60,6 @@ body {
   margin-top: 6px;
 }
 
-.splash-container--post .play-button {
-  color: #1a1a1a;
-}
 
 .play-button:hover {
   filter: brightness(1.1);
@@ -90,24 +72,6 @@ body {
 .play-button:focus-visible {
   outline: 2px solid #ffffff;
   outline-offset: 3px;
-}
-
-.splash-hint {
-  font-size: 0.75em;
-  opacity: 0.65;
-  letter-spacing: 0.04em;
-}
-
-.splash-timer {
-  font-size: clamp(1em, 3.5vw, 1.4em);
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  font-variant-numeric: tabular-nums;
-  padding: 6px 16px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  margin-top: -6px;
 }
 
 /* Viewer's Snoovatar (from /api/initialize playerPhoto) */

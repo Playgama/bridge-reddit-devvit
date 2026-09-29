@@ -1,8 +1,9 @@
-import { el, parseJsonLoose, pretty, setText } from '../util'
+import { el, pretty, setText } from '../util'
 
-// On Reddit: share() leaves a comment under the current post, createPost()
-// creates a new post running this app (optionally with `data` attached — it
-// comes back as `platform.launchData.data` when that post is opened).
+// On Reddit: share() leaves a comment under the current post and createPost()
+// creates a new post running this app. A post declared in the config `posts`
+// section is created by its id, and the game that is launched from it reads the
+// same entry back as platform.data.
 export function bindSocialSection(bridge: PlaygamaBridge): void {
     const s = bridge.social
     setText('social-share-supported', s.isShareSupported)
@@ -14,6 +15,7 @@ export function bindSocialSection(bridge: PlaygamaBridge): void {
     setText('social-fav-supported', s.isAddToFavoritesSupported)
     setText('social-fav-reward-supported', s.isAddToFavoritesRewardSupported)
     setText('social-rate-supported', s.isRateSupported)
+    setText('social-post-reward-supported', s.isPostRewardSupported)
 
     const out = el('social-output')
     const wrap = async (label: string, fn: () => Promise<unknown>): Promise<void> => {
@@ -38,24 +40,19 @@ export function bindSocialSection(bridge: PlaygamaBridge): void {
     )
 
     el<HTMLButtonElement>('social-post-btn').addEventListener('click', () => {
-        const text = el<HTMLInputElement>('social-post-title').value
-        const data = parseJsonLoose(el<HTMLInputElement>('social-post-data').value)
-        const claimable = el<HTMLInputElement>('social-post-claimable').checked
-        return wrap('createPost', () => s.createPost({ text, ...(data === undefined ? {} : { data }), claimable }))
+        const id = el<HTMLInputElement>('social-post-id').value.trim()
+        const text = el<HTMLInputElement>('social-post-title').value.trim()
+        const payload = el<HTMLInputElement>('social-post-payload').value.trim()
+        return wrap('createPost', () => (id
+            ? s.createPost(id, payload || undefined)
+            : s.createPost({ text })))
     })
 
-    // Claims: other players act on a claimable post; the author reads the inbox.
-    setText('social-claim-supported', s.isClaimSupported)
-    el<HTMLButtonElement>('social-claim-btn').addEventListener('click', () => {
-        const cooldown = Number(el<HTMLInputElement>('social-claim-cooldown').value) || 0
-        const scope = el<HTMLSelectElement>('social-claim-scope').value as 'user' | 'post'
-        return wrap('claim', () => s.claim({ cooldown, scope }))
-    })
-    el<HTMLButtonElement>('social-inbox-btn').addEventListener('click', () => wrap('getInbox', () => s.getInbox()))
-    el<HTMLButtonElement>('social-inbox-ack-btn').addEventListener('click', () => wrap('getInbox (ack all)', async () => {
-        const { serverTime } = await s.getInbox()
-        return s.getInbox({ ackUntil: serverTime })
-    }))
+    // One method for both sides: the visit reward inside a post, the author's
+    // rewards anywhere else.
+    el<HTMLButtonElement>('social-post-reward-btn').addEventListener('click', () =>
+        wrap('getPostReward', () => s.getPostReward()),
+    )
 
     el<HTMLButtonElement>('social-home-btn').addEventListener('click', () =>
         wrap('addToHomeScreen', () => s.addToHomeScreen()),

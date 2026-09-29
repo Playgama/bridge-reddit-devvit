@@ -10,11 +10,13 @@ The bridge's `RedditPlatformBridge` has no client SDK: every call it makes goes 
 | `storage` | Redis cloud saves, namespaced per user |
 | `leaderboards` | In-game leaderboards on Redis sorted sets |
 | `social.share` | Comment under the post the game runs in |
-| `social.createPost` | New post running this app, with optional data attached |
+| `social.createPost(id, payload?)` | New post running this app, described by an entry of the config `posts` section, with an optional payload string for this one post |
 | `social.joinCommunity` | Subscribe the user to the subreddit |
 | `payments` | Reddit Gold products via `@devvit/payments` |
-| `social.claim` / `social.getInbox` | Claims on posts created with `claimable: true`; the author reads the events |
-| `platform.launchData` | The post the game runs in (`postId`, `subredditName`, `authorId`, `data`) |
+| `platform.launchSource` / `platform.payload` | `post` when the game was opened from a post it created, and the payload that post was created with |
+| `platform.data` | What the launch carries: the platform's own launch parameters, plus `postId` when the game was opened from one of its posts |
+| `social.getPostReward` | Everything waiting for the player: the reward for the post they came through and what their own posts earned, in one array |
+| `platform.getServerTime` | Server clock of this app, so the game never trusts the device |
 
 ## Project layout
 
@@ -61,55 +63,69 @@ All endpoints are relative to the webview origin; Devvit routes `/api/*` to this
 
 | Bridge call | Endpoint | Request | Response |
 |---|---|---|---|
-| `initialize()` | `GET /api/initialize` | — | `{ isPlayerAuthorized, playerId?, playerName?, playerPhoto?, payload?, postId?, subredditName?, postAuthorId?, postAuthor?: { name, photo }, postData?, claimable?, claim? }` |
-| `storage.get(keys)` | `POST /api/storage/get` | `{ key: string[] }` | `unknown[]` — values in key order, `null` when missing |
-| `storage.set(keys, values)` | `POST /api/storage/set` | `{ key: string[], value: unknown[] }` | `{ success: true }` |
-| `storage.delete(keys)` | `POST /api/storage/delete` | `{ key: string[] }` | `{ success: true }` |
+| `initialize()` | `GET /api/initialize` | — | `{ isPlayerAuthorized, playerId?, playerName?, playerPhoto?, post?: { id?, payload? } }` |
+| `storage.get(key)` | `POST /api/storage/get` | `{ key: string }` (an array is also accepted) | the value, `null` when missing (an array of values for an array of keys) |
+| `storage.set(key, value)` | `POST /api/storage/set` | `{ key: string, value: unknown }` (arrays are also accepted) | `{ success: true }` |
+| `storage.delete(key)` | `POST /api/storage/delete` | `{ key: string }` (an array is also accepted) | `{ success: true }` |
 | `leaderboards.setScore(id, score)` | `POST /api/leaderboards/set-score` | `{ id, score, isMain }` | `{ success: true }` |
 | `leaderboards.getEntries(id)` | `GET /api/leaderboards/entries?id=` | — | `[{ id, name, score, rank, photo }]` |
 | `social.share({ text })` | `POST /api/share` | `{ options: { text, ... } }` | `{ commentId, commentUrl }` |
-| `social.createPost({ text, data?, payload?, claimable? })` | `POST /api/create-post` | `{ options: { title, data?, payload?, claimable?, ... } }` | `{ postId, postUrl }` → bridge resolves `{ id, url, postId, postUrl }` |
+| `social.createPost(id, payload?)` | `POST /api/create-post` | `{ options: { title, ... }, id, payload? }` — the content the platform needs, with the config entry id and the payload beside it | `{ postId, postUrl }` |
+| `social.getPostReward()`, the post side | `POST /api/post-visit-reward` | `{ cooldown }` from the config entry | `{ granted, reason? }` |
+| `social.getPostReward()`, the author side | `POST /api/post-author-reward` | — | `{ counts: { [postId]: number } }` |
 | `social.joinCommunity()` | `POST /api/join-community` | — | `{ success: true }` |
 | `platform.getServerTime()` | `GET /api/server-time` | — | `{ serverTime }` (ms) |
-| `social.claim({ cooldown?, scope? })` | `POST /api/claim` | `{ options: { cooldown, scope } }` | `{ granted, reason?, count, nextClaimAt, serverTime }` |
-| `social.getInbox({ ackUntil? })` | `POST /api/inbox` | `{ options: { ackUntil? } }` | `{ events: [{ postId, from: { id, name }, at }], serverTime }` |
 | `payments.getCatalog()` | `GET /api/catalog` | — | `[{ id, title, description, price, priceCurrencyCode, priceValue }]` |
 | `payments.getPurchases()` | `GET /api/purchases` | — | `[{ id, orderId, status, products }]` |
 | `payments.purchase(id)` | — | handled on the client by `@devvit/web/client` `purchase()` via `window.__playgama_devvit.purchase` | |
 
 Notes:
 
-- **Storage** keys are stored as `u:{userId}:{key}` — Devvit's Redis is per app installation, not per user. Guests (`isPlayerAuthorized: false`) get `401`; the bridge then falls back to local storage on its own.
+- **Storage** keys are stored as `u:{userId}:{key}` — Devvit's Redis is per app installation, not per user. The bridge asks for one key per request and gets one value back; an array of keys answers with an array of values, in key order. Guests (`isPlayerAuthorized: false`) get `401`; the bridge then falls back to local storage on its own.
 - **Leaderboards** keep one sorted set per leaderboard id (`lb:{id}`), one score per user, updated only when the new score is higher. `getEntries` returns the top 50 with the player's public profile snapshot taken at `setScore` time.
 - **Share** is a comment on the post the game is running in (`context.postId`), posted as the user (`permissions.reddit.scope: "user"`).
-- **Post card (splash)**: the inline post view is `splash.html`. If the game attached `data.preview = { title?, button?, image?, accent? }` when creating the post, the splash renders it — title, the author's name and Snoovatar (from the server), the button label — and, for claimable posts, the viewer's claim state (CLAIM / PLAY with a countdown / "Your post · N claimed"). Everything else in `data` is ignored by the splash; without `preview` the default game card is shown.
-- **Create post** creates a post with the `default` entrypoint in the current subreddit. `data` (any JSON) and `payload` (string) are stored under the new post id and returned by `/api/initialize` — as `platform.launchData.data` and `platform.payload` — when someone opens that post. This is how user-generated content (levels, challenges) travels between posts. `data` is for the game; the post card is described by `data.preview` (see above); `payload` is the plain-string form for games that only need a short id.
-- **Claims**: a post created with `claimable: true` accepts `social.claim()` from other players for 30 days. When such a post is opened, `platform.launchData` carries `claimable: true` and `claim` — the current player's status without claiming (`{ available, reason?, count, nextClaimAt, serverTime }`) — so a splash or the game can show a countdown or "your post · N claimed" before any button is pressed. `claim()` is verified here: the user comes from `context`, the author cannot claim their own post, and the cooldown is a `SET NX` lock keyed by player (`scope: "user"`, default) or by player+post (`scope: "post"`) with the cooldown as TTL — no cooldown means a one-time claim. Each granted claim is queued in the author's inbox (`inbox:{userId}`, last 200 events); the author reads it with `social.getInbox()` and acknowledges with `ackUntil: serverTime` once the reward is applied. Server cap: 100 claims per post per day. What a claim grants is decided by the game on both sides.
+- **Create post** creates a post with the `default` entrypoint in the current subreddit, titled by the `text` of the config entry. The entry id and the author are remembered for 30 days, which is the window post rewards use. When someone opens that post, `/api/initialize` returns the id and the bridge hands the whole entry to the game as `platform.data`.
+- **Post card (splash)**: the inline post view is `splash.html` — a title and a Play button that opens the game fullscreen, plus the viewer's Snoovatar read from `/api/initialize`. Put the game's own title and art in `splash.html` and `splash.css`.
 - **Payments**: Reddit allows fixed Gold price tiers (5, 25, 50, 100, 150, 250, 500, 1000, 2500). `/internal/payments/fulfill` is where to persist entitlements server-side if the game needs it; by default the webview grants them from the `purchase()` result.
 
-## Example: "help me" energy posts, client only
+## Posts
 
-```js
-// Out of energy → ask the community. The post carries `data` for the game.
-const { url } = await bridge.social.createPost({ text: 'u/me needs energy!', data: { type: 'energy' }, claimable: true })
+A post is declared once in `playgama-bridge-config.json` and created by its id, so the game carries no texts and the publisher edits them without a rebuild:
 
-// Someone opened that post → claim once per 4 hours, then reward both sides.
-const launch = bridge.platform.launchData
-if (launch?.claimable && launch.data?.type === 'energy' && bridge.social.isClaimSupported) {
-  if (launch.claim && !launch.claim.available) showTimer(launch.claim)          // cooldown / own post / expired
-  else {
-    const result = await bridge.social.claim({ cooldown: 4 * 3600, scope: 'user' })
-    if (result.granted) energy += 1
-  }
-}
-
-// The author, on next launch: one energy per helper, then acknowledge.
-const { events, serverTime } = await bridge.social.getInbox()
-energy += events.length
-await bridge.social.getInbox({ ackUntil: serverTime })
+```json
+"posts": [
+    {
+        "id": "gift",
+        "text": "I'm sharing coins!",
+        "rewards": [
+            { "id": "coins", "amount": 100 },
+            { "id": "coins", "amount": 50, "type": "author" }
+        ],
+        "rewardCooldown": 14400,
+        "reddit": { "text": "🎁 Free coins inside" }
+    }
+]
 ```
 
-No server code and no `devvit.json` changes are needed for this — the same code runs on every platform where `bridge.social.isClaimSupported` is true.
+`text` becomes the Reddit post title and the `reddit` block overrides the common fields on Reddit. `rewards` follows the shape the tasks module uses: `id` and `amount` are opaque to the bridge, the game decides what they mean, and `type` says who gets the reward — the player who came through the post (the default) or its author, once per such player. The same code runs on every platform:
+
+```js
+// share a post
+if (bridge.social.isCreatePostSupported) {
+    const { url } = await bridge.social.createPost('gift')
+}
+
+// one call covers both sides and always resolves: an empty array simply means
+// nothing is waiting — no reason to tell the player anything
+if (bridge.social.isPostRewardSupported) {
+    const rewards = await bridge.social.getPostReward()
+    rewards.forEach(({ id, amount }) => grant(id, amount))
+}
+```
+
+Only the entry id and the payload travel to this server; the values are resolved from the config on the client, so editing the config changes the behaviour of posts that already exist. The payload is the game's own string for one post — a shared level, a seed, a challenge — stored for a year and handed back as `platform.payload` when someone opens that post. A game recognises this kind of launch through `platform.launchSource`, the same field that already reports notification launches.
+
+`/api/post-visit-reward` is verified here: the user comes from `context`, the author is never rewarded on their own post, and the wait is a `SET NX` lock keyed by player with the cooldown as TTL. The lock is per player, not per post, so a player who opens ten posts in a row is rewarded once. No cooldown means a one-time reward. Rewards stop 30 days after the post was created, and a post grants at most 100 per day. Every granted reward increments the author's counter for the config entry the post was created from, kept as a hash under `reward:{userId}:counts`. `/api/post-author-reward` hands the counters out and clears them, so a game with several kinds of post rewards each kind on its own terms.
 
 ## Reddit hooks (`/internal/*`)
 

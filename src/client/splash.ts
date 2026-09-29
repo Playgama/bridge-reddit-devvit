@@ -3,156 +3,112 @@ import { requestExpandedMode } from '@devvit/web/client'
 // The splash is the inline post view; the game itself runs in the `game`
 // entrypoint (see devvit.json) which opens in expanded (fullscreen) mode.
 //
-// It reads /api/initialize — the same endpoint the bridge uses — and renders
-// the post card from what the game attached when it created the post:
-//   data.preview = { title?, button?, image?, accent? }   (all optional)
-// The author (name, Snoovatar) and the viewer's claim state come from the
-// server, so the game never has to describe them.
+// It reads /api/initialize — the same endpoint the bridge uses — for the viewer
+// and for the id of the `posts` config entry this post was created from. The
+// card is then drawn from that entry's `card` block, so what a post looks like
+// is declared next to everything else about it and needs no code here.
 
-interface ClaimStatus {
-  available: boolean
-  reason?: 'unauthorized' | 'own' | 'cooldown' | 'expired' | 'limit'
-  count: number
-  nextClaimAt: number | null
-  serverTime: number
-}
-
-interface Preview {
+interface PostCard {
   title?: string
   button?: string
   image?: string
   accent?: string
 }
 
+interface PostEntry {
+  id: string
+  text?: string
+  card?: PostCard
+  [key: string]: unknown
+}
+
 interface InitializeResponse {
   playerName?: string
   playerPhoto?: string
-  postData?: { preview?: Preview } & Record<string, unknown>
-  postAuthor?: { name: string | null; photo: string | null }
-  claimable?: boolean
-  claim?: ClaimStatus
+  post?: { id?: string }
 }
+
+const PLATFORM_ID = 'reddit'
 
 function el<T extends HTMLElement = HTMLElement>(id: string): T | null {
   return document.getElementById(id) as T | null
 }
 
-function setText(id: string, text: string): void {
-  const node = el(id)
-  if (!node) return
-  node.textContent = text
-  node.hidden = false
+function showPlayer({ playerName, playerPhoto }: InitializeResponse): void {
+  if (!playerPhoto) return
+
+  const wrap = el('splash-player')
+  const avatar = el<HTMLImageElement>('splash-player-avatar')
+  const name = el('splash-player-name')
+  if (!wrap || !avatar) return
+
+  avatar.onload = () => { wrap.hidden = false }
+  avatar.onerror = () => { wrap.hidden = true }
+  avatar.src = playerPhoto
+  if (name) name.textContent = playerName ? `u/${playerName}` : ''
 }
 
-function setImage(id: string, src?: string | null): void {
-  const img = el<HTMLImageElement>(id)
-  if (!img || !src) return
-  img.onload = () => { img.hidden = false }
-  img.onerror = () => { img.hidden = true }
-  img.src = src
-}
+// The entry as the bridge resolves it: the platform block wins over the common
+// fields, every other platform's block is ignored.
+async function readPostEntry(id: string): Promise<PostEntry | null> {
+  try {
+    const response = await fetch('./playgama-bridge-config.json')
+    if (!response.ok) return null
 
-function formatCountdown(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000))
-  const h = String(Math.floor(total / 3600)).padStart(2, '0')
-  const m = String(Math.floor((total % 3600) / 60)).padStart(2, '0')
-  const s = String(total % 60).padStart(2, '0')
-  return `${h}:${m}:${s}`
-}
+    const config = await response.json() as { posts?: PostEntry[] }
+    const entry = config.posts?.find((post) => post?.id === id)
+    if (!entry) return null
 
-// Live countdown to `nextClaimAt` on the server clock; flips to ready at zero.
-function startCountdown(claim: ClaimStatus, onReady: () => void): void {
-  const offset = claim.serverTime - Date.now()
-  const target = claim.nextClaimAt ?? 0
-  const tick = (): void => {
-    const remaining = target - (Date.now() + offset)
-    if (remaining <= 0) {
-      onReady()
-      return
-    }
-    setText('splash-timer', formatCountdown(remaining))
-    window.setTimeout(tick, 1000)
-  }
-  tick()
-}
-
-function showClaimReady(button: string): void {
-  const timer = el('splash-timer')
-  if (timer) timer.hidden = true
-  setText('play-button', button)
-  setText('splash-hint', 'Open the game to claim')
-}
-
-function applyClaimState(claim: ClaimStatus | undefined, button: string): void {
-  if (!claim || claim.available) {
-    showClaimReady(button)
-    return
-  }
-
-  setText('play-button', 'PLAY')
-  switch (claim.reason) {
-    case 'own':
-      setText('splash-hint', `Your post · ${claim.count} player(s) claimed it`)
-      break
-    case 'cooldown':
-      if (claim.nextClaimAt) {
-        setText('splash-hint', 'Not ready yet. Next claim in')
-        startCountdown(claim, () => showClaimReady(button))
-      } else {
-        setText('splash-hint', 'Already claimed')
-      }
-      break
-    case 'unauthorized':
-      setText('splash-hint', 'Log in to Reddit to claim')
-      break
-    default:
-      setText('splash-hint', 'This offer is no longer available')
+    const platformData = entry[PLATFORM_ID]
+    return platformData && typeof platformData === 'object'
+      ? { ...entry, ...platformData as PostEntry }
+      : entry
+  } catch (error) {
+    console.warn('Could not read the posts config:', error)
+    return null
   }
 }
 
-function render(response: InitializeResponse): void {
-  const {
-    playerName, playerPhoto, postData, postAuthor, claimable, claim,
-  } = response
-
-  // The viewer, as a character in the corner.
-  if (playerPhoto) {
-    setImage('splash-player-avatar', playerPhoto)
-    const wrap = el('splash-player')
-    const avatar = el<HTMLImageElement>('splash-player-avatar')
-    if (wrap && avatar) {
-      avatar.onload = () => { wrap.hidden = false }
-    }
-    setText('splash-player-name', playerName ? `u/${playerName}` : '')
-  }
-
-  const preview = postData?.preview
-  if (!preview) return
-
+function drawCard(entry: PostEntry): void {
+  const card = entry.card ?? {}
+  const title = card.title ?? entry.text
   const root = el('splash')
-  if (root) {
-    root.classList.add('splash-container--post')
-    if (preview.accent) root.style.setProperty('--accent', preview.accent)
-  }
-  if (preview.title) setText('splash-title', preview.title)
-  setImage('splash-image', preview.image ?? postAuthor?.photo)
-  if (postAuthor?.name) setText('splash-subtitle', `u/${postAuthor.name}`)
+  const image = el<HTMLImageElement>('splash-image')
 
-  if (claimable) {
-    applyClaimState(claim, preview.button ?? 'CLAIM')
-  } else if (preview.button) {
-    setText('play-button', preview.button)
+  if (root && card.accent) root.style.setProperty('--accent', card.accent)
+  if (title) {
+    const node = el('splash-title')
+    if (node) node.textContent = title
+  }
+  if (card.button) {
+    const button = el('play-button')
+    if (button) button.textContent = card.button
+  }
+  if (image && card.image) {
+    image.onload = () => { image.hidden = false }
+    image.onerror = () => { image.hidden = true }
+    image.src = card.image
   }
 }
 
 async function applyPostContext(): Promise<void> {
+  let response: InitializeResponse
   try {
-    const response = await fetch('/api/initialize')
-    if (!response.ok) return
-    render((await response.json()) as InitializeResponse)
+    const result = await fetch('/api/initialize')
+    if (!result.ok) return
+    response = await result.json() as InitializeResponse
   } catch (error) {
-    console.warn('Could not read post context:', error)
+    console.warn('Could not read the post context:', error)
+    return
   }
+
+  showPlayer(response)
+
+  const postId = response.post?.id
+  if (!postId) return
+
+  const entry = await readPostEntry(postId)
+  if (entry) drawCard(entry)
 }
 
 el('play-button')?.addEventListener('click', async (event) => {
